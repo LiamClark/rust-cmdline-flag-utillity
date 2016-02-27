@@ -1,4 +1,5 @@
 use FlagFormat;
+// use ArgMap;
 
 
 #[test]
@@ -31,3 +32,10 @@ fn integration_test_string() {
     let args = FlagFormat::parse("p*,l#,r");
     assert!(args.is_string_arg(&"p"))
 }
+//
+// #[test]
+// fn test_one_arg() {
+//     let args = vec!["-p".into()];
+//     let argmap = ArgMap::new("p", args);
+//     assert!(argmap.get_bool_arg("p").unwrap());
+// }

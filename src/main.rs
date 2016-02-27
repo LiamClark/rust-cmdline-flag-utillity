@@ -1,11 +1,47 @@
 mod tests;
 
 use std::env;
+use std::collections::HashMap;
 
 fn main() {
     let flags : Vec<_> = env::args().skip(1).collect();
+
+    for arg in flags.iter() {
+        for i in arg.chars() {
+            println!("{}",i);
+        }
+    }
     println!("{:?}", flags)
 }
+
+
+struct ArgMap {
+    bools   : HashMap<String, bool>,
+    ints    : HashMap<String, i32>,
+    strings : HashMap<String, String>,
+}
+
+impl ArgMap {
+    pub fn new(format: &str, args: Vec<String> ) -> ArgMap {
+        let mut bools   =   HashMap::new();
+        let mut ints    =   HashMap::new();
+        let mut strings =   HashMap::new();
+
+        let format = FlagFormat::parse(format);
+
+        for arg in args.iter() {
+            for arg in arg.chars() {
+
+            }
+        }
+
+    }
+
+    pub fn get_bool_arg(&self,name: &str) -> Option<&bool> {
+        self.bools.get(name)
+    }
+}
+
 
 struct FlagFormat {
     bools   : Vec<String>,
