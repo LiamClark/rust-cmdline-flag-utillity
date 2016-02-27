@@ -1,0 +1,6 @@
+[package]
+name = "cmdflags"
+version = "0.1.0"
+authors = ["LiamClark <L.A.Clark@student.tudelft.nl>"]
+
+[dependencies]
