@@ -1,23 +1,28 @@
 use FlagFormat;
-use parse_multi_letter;
 
 
 #[test]
 fn parse_multi_test_one_letter(){
-    let expected = ("p".to_string(),"*".to_string());
-    assert_eq!(parse_multi_letter("p*".to_string()).unwrap(), expected);
+    let expected = ("p".to_string(),None);
+    assert_eq!(FlagFormat::split_argument_specifier("p".to_string()), expected);
 }
 
 #[test]
-fn longer_name() {
-    let expected = ("ttp".to_string(),"*".to_string());
-    assert_eq!(parse_multi_letter("ttp*".to_string()).unwrap(), expected);
+fn multi_letter_test() {
+    let expected = ("p".to_string(),Some("*".to_string()));
+    assert_eq!(FlagFormat::split_argument_specifier("p*".to_string()),expected)
 }
 
-
 #[test]
-#[ignore]
-fn integration_test() {
+fn integration_test_bool() {
     let args = FlagFormat::parse("p*, l#,r");
-    let bool = args.getBool("r");
+    let arg = args.getBool(&"r".to_string());
+    assert!(!arg.unwrap())
+}
+
+
+#[test]
+fn integration_test_int() {
+    let args = FlagFormat::parse("p*,l#,r");
+    assert_eq!(args.getInt(&String::from("l")).unwrap(), &3)
 }
