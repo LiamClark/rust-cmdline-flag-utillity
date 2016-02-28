@@ -21,6 +21,17 @@ struct ArgMap {
     // strings : HashMap<String, String>,
 }
 
+#[derive(PartialEq)]
+enum ParseState {
+    NewToken,
+    StringFlag{name : String},
+    IntFlag{name: String},
+    BoolArg{name: String},
+    InvalidFlag,
+    Value,
+    End,
+}
+
 impl ArgMap {
     pub fn new(format: &str, args: Vec<String> ) -> ArgMap {
         let mut bools   =   HashMap::new();
@@ -45,6 +56,49 @@ impl ArgMap {
         }
 
         ArgMap{bools : bools}
+    }
+
+    fn parse(&self, format : &FlagFormat, args:Vec<String>) {
+        let mut state = ParseState::NewToken;
+        let mut argIter = args.iter();
+
+        while state != ParseState::End {
+            match state {
+                ParseState::NewToken => {
+                    if let Some(s) = argIter.next() {
+                        state = ArgMap::is_flag(s, format);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    fn is_flag(arg: &str, format: &FlagFormat) -> ParseState {
+         let mut chars = arg.chars();
+
+         match chars.next() {
+            Some('-') => {
+                let name : String = chars.collect();
+                ArgMap::flag_type(name, format)
+            }
+            _ => ParseState::InvalidFlag
+          }
+    }
+
+    fn flag_type(name: String, format: &FlagFormat) -> ParseState {
+        //TODO this is ugly.
+        let clone = name.clone();
+        let trim = clone.trim();
+        if format.is_bool_arg(trim) {
+            ParseState::BoolArg{name: name}
+        } else if format.is_int_arg(trim) {
+            ParseState::IntFlag{name: name}
+        } else if format.is_string_arg(trim) {
+            ParseState::StringFlag{name: name}
+        } else {
+            ParseState::InvalidFlag
+        }
     }
 
     pub fn get_bool_arg(&self, name: &str) -> bool {
