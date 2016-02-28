@@ -17,28 +17,38 @@ fn main() {
 
 struct ArgMap {
     bools   : HashMap<String, bool>,
-    ints    : HashMap<String, i32>,
-    strings : HashMap<String, String>,
+    // ints    : HashMap<String, i32>,
+    // strings : HashMap<String, String>,
 }
 
 impl ArgMap {
     pub fn new(format: &str, args: Vec<String> ) -> ArgMap {
         let mut bools   =   HashMap::new();
-        let mut ints    =   HashMap::new();
-        let mut strings =   HashMap::new();
+        // let mut ints    =   HashMap::new();
+        // let mut strings =   HashMap::new();
 
         let format = FlagFormat::parse(format);
 
         for arg in args.iter() {
-            for arg in arg.chars() {
+             let mut chars  = arg.chars();
 
-            }
+             match chars.next() {
+                 Some('-') => {
+                     let name : String = chars.collect();
+                     if format.is_bool_arg(name.trim()) {
+                         bools.insert(name,true);
+                     }
+                 }
+                 Some(_) => {}
+                 None => {}
+             };
         }
 
+        ArgMap{bools : bools}
     }
 
-    pub fn get_bool_arg(&self,name: &str) -> Option<&bool> {
-        self.bools.get(name)
+    pub fn get_bool_arg(&self, name: &str) -> bool {
+        self.bools.get(name).is_some()
     }
 }
 
