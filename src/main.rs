@@ -18,7 +18,7 @@ fn main() {
 struct ArgMap {
     bools   : HashMap<String, bool>,
     ints    : HashMap<String, i32>,
-    // strings : HashMap<String, String>,
+    strings : HashMap<String, String>,
 }
 
 #[derive(PartialEq)]
@@ -28,18 +28,17 @@ enum ParseState {
     IntFlag(String),
     BoolArg(String),
     InvalidFlag,
-    Value,
 }
 
 impl ArgMap {
     pub fn new(format: &str, args: Vec<String> ) -> ArgMap {
         let bools   =   HashMap::new();
         let ints    =   HashMap::new();
-        // let mut strings =   HashMap::new();
+        let strings =   HashMap::new();
 
         let format = FlagFormat::parse(format);
 
-        let mut map = ArgMap{bools : bools, ints: ints};
+        let mut map = ArgMap{bools : bools, ints: ints, strings: strings};
         map.parse(&format, args);
 
         map
@@ -47,12 +46,12 @@ impl ArgMap {
 
     fn parse(&mut self, format : &FlagFormat, args:Vec<String>) {
         let mut state = ParseState::NewToken;
-        let mut argIter = args.iter();
+        let mut arg_iter = args.iter();
 
         loop {
             state = match state {
                  ParseState::NewToken => {
-                    if let Some(s) = argIter.next() {
+                    if let Some(s) = arg_iter.next() {
                          ArgMap::is_flag(s, format)
                     } else {
                         ParseState::InvalidFlag
@@ -63,10 +62,17 @@ impl ArgMap {
                     ParseState::NewToken
                 }
                 ParseState::IntFlag(n) => {
-                    if let Some(Ok(i)) = argIter.next().map(|s|{ println!("{}",s);
-                     s.parse::<i32>()}) {
+                    if let Some(Ok(i)) = arg_iter.next().map(|s| s.parse::<i32>()) {
                          self.ints.insert(n,i);
                          ParseState::NewToken
+                    } else {
+                        ParseState::InvalidFlag
+                    }
+                }
+                ParseState::StringFlag(n) => {
+                    if let Some(value) = arg_iter.next() {
+                        self.strings.insert(n, value.clone());
+                        ParseState::NewToken
                     } else {
                         ParseState::InvalidFlag
                     }
@@ -109,8 +115,11 @@ impl ArgMap {
     }
 
     pub fn get_int_arg(&self, name: &str) -> Option<&i32> {
-        println!("{:?}",self.ints);
         self.ints.get(name)
+    }
+
+    pub fn get_string_arg(&self, name: &str) -> Option<&String> {
+        self.strings.get(name)
     }
 }
 

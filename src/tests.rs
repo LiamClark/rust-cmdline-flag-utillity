@@ -53,3 +53,20 @@ fn test_int_arg() {
     let argmap = ArgMap::new("p#", args);
     assert_eq!(argmap.get_int_arg("p"), Some(&34));
 }
+
+#[test]
+fn bool_and_int_arg() {
+    let args = vec!["-p".into(), "34".into(),"-l".into()];
+    let argmap = ArgMap::new("p#,l", args);
+    assert_eq!(argmap.get_int_arg("p"), Some(&34));
+    assert!(argmap.get_bool_arg("l"));
+}
+
+#[test]
+fn all_arg_types() {
+    let args = vec!["-p".into(), "34".into(),"-l".into(), "hello".into(),"-r".into()];
+    let argmap = ArgMap::new("p#,l*,r", args);
+    assert_eq!(argmap.get_int_arg("p"), Some(&34));
+    assert!(argmap.get_bool_arg("r"));
+    assert_eq!(argmap.get_string_arg(&"l"),Some( &"hello".into()))
+}
