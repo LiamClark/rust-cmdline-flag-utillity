@@ -46,3 +46,10 @@ fn test_bool_arg_of() {
     let argmap = ArgMap::new("p", args);
     assert!(!argmap.get_bool_arg("p"));
 }
+
+#[test]
+fn test_int_arg() {
+    let args = vec!["-p".into(), "34".into()];
+    let argmap = ArgMap::new("p#", args);
+    assert_eq!(argmap.get_int_arg("p"), Some(&34));
+}

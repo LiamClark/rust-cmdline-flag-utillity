@@ -17,59 +17,61 @@ fn main() {
 
 struct ArgMap {
     bools   : HashMap<String, bool>,
-    // ints    : HashMap<String, i32>,
+    ints    : HashMap<String, i32>,
     // strings : HashMap<String, String>,
 }
 
 #[derive(PartialEq)]
 enum ParseState {
     NewToken,
-    StringFlag{name : String},
-    IntFlag{name: String},
-    BoolArg{name: String},
+    StringFlag(String),
+    IntFlag(String),
+    BoolArg(String),
     InvalidFlag,
     Value,
-    End,
 }
 
 impl ArgMap {
     pub fn new(format: &str, args: Vec<String> ) -> ArgMap {
-        let mut bools   =   HashMap::new();
-        // let mut ints    =   HashMap::new();
+        let bools   =   HashMap::new();
+        let ints    =   HashMap::new();
         // let mut strings =   HashMap::new();
 
         let format = FlagFormat::parse(format);
 
-        for arg in args.iter() {
-             let mut chars  = arg.chars();
+        let mut map = ArgMap{bools : bools, ints: ints};
+        map.parse(&format, args);
 
-             match chars.next() {
-                 Some('-') => {
-                     let name : String = chars.collect();
-                     if format.is_bool_arg(name.trim()) {
-                         bools.insert(name,true);
-                     }
-                 }
-                 Some(_) => {}
-                 None => {}
-             };
-        }
-
-        ArgMap{bools : bools}
+        map
     }
 
-    fn parse(&self, format : &FlagFormat, args:Vec<String>) {
+    fn parse(&mut self, format : &FlagFormat, args:Vec<String>) {
         let mut state = ParseState::NewToken;
         let mut argIter = args.iter();
 
-        while state != ParseState::End {
-            match state {
-                ParseState::NewToken => {
+        loop {
+            state = match state {
+                 ParseState::NewToken => {
                     if let Some(s) = argIter.next() {
-                        state = ArgMap::is_flag(s, format);
+                         ArgMap::is_flag(s, format)
+                    } else {
+                        ParseState::InvalidFlag
                     }
                 }
-                _ => {}
+                ParseState::BoolArg(n) => {
+                    self.bools.insert(n,true);
+                    ParseState::NewToken
+                }
+                ParseState::IntFlag(n) => {
+                    if let Some(Ok(i)) = argIter.next().map(|s|{ println!("{}",s);
+                     s.parse::<i32>()}) {
+                         self.ints.insert(n,i);
+                         ParseState::NewToken
+                    } else {
+                        ParseState::InvalidFlag
+                    }
+                }
+                _ => {break; }
             }
         }
     }
@@ -90,12 +92,13 @@ impl ArgMap {
         //TODO this is ugly.
         let clone = name.clone();
         let trim = clone.trim();
+
         if format.is_bool_arg(trim) {
-            ParseState::BoolArg{name: name}
+            ParseState::BoolArg(name)
         } else if format.is_int_arg(trim) {
-            ParseState::IntFlag{name: name}
+            ParseState::IntFlag(name)
         } else if format.is_string_arg(trim) {
-            ParseState::StringFlag{name: name}
+            ParseState::StringFlag(name)
         } else {
             ParseState::InvalidFlag
         }
@@ -103,6 +106,11 @@ impl ArgMap {
 
     pub fn get_bool_arg(&self, name: &str) -> bool {
         self.bools.get(name).is_some()
+    }
+
+    pub fn get_int_arg(&self, name: &str) -> Option<&i32> {
+        println!("{:?}",self.ints);
+        self.ints.get(name)
     }
 }
 
