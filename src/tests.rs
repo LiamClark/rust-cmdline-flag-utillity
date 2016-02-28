@@ -39,3 +39,10 @@ fn test_one_arg() {
     let argmap = ArgMap::new("p", args);
     assert!(argmap.get_bool_arg("p"));
 }
+
+#[test]
+fn test_bool_arg_of() {
+    let args = vec!["-l".into()];
+    let argmap = ArgMap::new("p", args);
+    assert!(!argmap.get_bool_arg("p"));
+}
