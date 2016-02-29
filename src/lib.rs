@@ -15,7 +15,7 @@ fn main() {
 }
 
 
-struct ArgMap {
+pub struct ArgMap {
     bools   : HashMap<String, bool>,
     ints    : HashMap<String, i32>,
     strings : HashMap<String, String>,
@@ -31,6 +31,12 @@ enum ParseState {
 }
 
 impl ArgMap {
+    //
+    //creates a new argmap
+    //of the arg vector without the first one.
+    //format is a comma delimted string of flagsnames and their type.
+    //for example p*,l#,r makes a command map of an string p an integer l and a boolean switchl
+    //
     pub fn new(format: &str, args: Vec<String> ) -> ArgMap {
         let bools   =   HashMap::new();
         let ints    =   HashMap::new();
